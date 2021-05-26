@@ -35,17 +35,19 @@ global proc sourcePyModule(string $path)
 	python("appendGo = 1");
 	python("for aPath in sysPath: \n if(aPath == '" + $path + "'): appendGo = 0");
 	// Append if necessary the python add-on path
-	python("if appendGo: \n sys.path.append('" + $path + "')\n print 'appending " + $path + "'");
+	python("if appendGo: \n sys.path.append('" + $path + "')\n print('appending " + $path + "')");
 	// And Here comes the MEL to Python work-around
 	// Because os.path.exists returns true even when the path is invalid for importing
 	// python modules (probably due to being called through MEL) for some computers
 	// we take the back slash off of a given path so that
 	// the directory will be recognized when importing python modules
 	python("pyPath = '" + $path + "'");
+    python("print('" + $path + "')");
 	python("pyPath = pyPath[:-1]");
 	python("appendGo = 1");
 	python("for aPath in sysPath: \n if(aPath == pyPath): appendGo = 0");
-	python("if appendGo: \n sys.path.append(pyPath)\n print 'appending %s' % pyPath");
+	//python("if appendGo: \n sys.path.append(pyPath)\n print 'appending %s' % pyPath");
+    python("if appendGo: \n sys.path.append(pyPath)\n print('appending {}'.format(pyPath))");
 	
 	string $pyFiles[] = `getFileList -folder $path -filespec "*.py"`;
 	string $eachFile;
