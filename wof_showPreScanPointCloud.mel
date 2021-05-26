@@ -1,0 +1,7 @@
+global proc wof_showPreScanPointCloud()
+{
+	connectAttr -f "prescanpointcloud1_0Shape.outMesh" "pointCloudFx_model:pointCloud_geoShape.inMesh";
+	//polySoftEdge -a 0 -ch 1 pinBoard_fx:cityPinBoard_geo;
+	connectAttr -f "prescanpointcloud1_0Shape.colorSet[0]" "pointCloudFx_model:pointCloud_geoShape.colorSet[1]";
+	setAttr "preScanPointCloudSource.houdiniAssetParm_onOff" 1;
+}

@@ -1,0 +1,5 @@
+global proc wof_showPin()
+{
+	connectAttr -f "pinboard_convert1_0Shape.outMesh" "pinBoard_fx:cityPinBoard_geoShape.inMesh";
+	polySoftEdge -a 0 -ch 1 pinBoard_fx:cityPinBoard_geo;
+}

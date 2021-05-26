@@ -1,0 +1,14 @@
+//source "wofScriptMenu.mel";
+source "BigKeeperMeun.mel";
+source "BigPictureMeun.mel";
+//source "cometMenu.mel";
+//source "DeadlineMayaClient.mel";
+//source "redshiftRGB.mel";
+//source "userHotkeys_Maya_Default_Duplicate.mel";
+//source "FileTextureManager_2018.mel";
+
+//renderThumbnailUpdate 0;
+
+
+//source "mrmc_v145.mel";
+//if( startsWith( `whatIs DeadlineMayaClient`, "Mel procedure found in" ) ){ DeadlineMayaClient(); }else{ warning( "DeadlineMayaClient either has errors or has not been installed." ); }

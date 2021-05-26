@@ -1,0 +1,30 @@
+global string $gMainWindow;     // defined elsewhere by Maya
+
+// --------------------------------------------------------------------------
+    
+    // Get rid of existing menu in case it exists already...
+    //
+if (`menu -q -exists bigPictureScriptMeun`)
+    {
+    menu -e -dai bigPictureScriptMeun;
+    }
+else
+    {
+	setParent $gMainWindow ;
+    menu -l "BigPictureScript" -p MayaWindow -to true bigPictureScriptMeun ;
+    }
+
+setParent -menu bigPictureScriptMeun ;
+
+
+//menuItem -l "Tools" -sm true -to true ;
+    menuItem -l ("Clean Up UV Layout") -c ("cleanUpAndLayoutBaseUV(); ") -ann ("Open cleanUpUVLayout");
+	menuItem -l ("Add Time Wrap") -c ("addTimeWrap(); ") -ann ("Open addTimeWrap");
+	menuItem -l ("Rs Shader create") -c ("rsShaderCreate_Assign(); ") -ann ("Rs Shader Assign and Create");
+	menuItem -l ("Add FootagePlane Geo") -c ("addFootagePlane(); ") -ann ("Add Footage Plane Geo to Camera");
+	menuItem -l ("BigKeeperPy Tester") -c ( "python(\"import sys;sys.path.append('N:/bpPipeline/bigKeeperPy/repo_03Tester');import tester_mode;sys.path.remove('N:/bpPipeline/bigKeeperPy/repo_03Tester');tester_mode.main()\");  ") -ann ("Open BigKeeperPy Tester Mode");
+	menuItem -l ("BigKeeperPy Release") -c ( "python(\"import sys;sys.path.append('N:/bpPipeline/bigKeeperPy/repo_09Release');import release_mode;sys.path.remove('N:/bpPipeline/bigKeeperPy/repo_09Release');release_mode.main()\");  ") -ann ("Open BigKeeperPyTest Release Mode");
+	
+//    setParent -menu ".." ;
+
+

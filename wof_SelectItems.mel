@@ -1,0 +1,152 @@
+global proc wof_SelectItems()
+{
+	if ( `window -ex "wof_Select"`)
+	{
+		deleteUI "wof_Select";
+	}
+
+    window -s 1 -width 250 -t "WOF items select" "wof_Select";
+    columnLayout;
+    text -l "select Icon " -fn "boldLabelFont";
+    separator -height 10 -style "single";
+    checkBox -label "icon 015" icon1;
+    checkBox -label "icon 046" icon2;
+    checkBox -label "icon 086" icon3;
+    checkBox -label "icon 008" icon4;
+    
+    button -l "select Icon Control" -c selectIcon selCtl;
+    button -l "select Icon TimeWrap" -c selectIconTime selTimeWrap;
+    
+    
+    
+    
+    separator -height 20 -style "single";
+    text -l "================================================" -fn "boldLabelFont";
+    text -l "select City Ctrl " -fn "boldLabelFont";
+    separator -height 10 -style "single";
+    
+    button -l "select city Translate" -c selCityTran selCityT;
+    button -l "select city Rotate" -c selCityRot selCityR;
+    button -l "select switch_Ctrl" -c selSwitchCtrl;
+    
+    
+    
+    /*button -label "Create EnvSphere" -c createEnvSphere;
+    button -label "Connect EnvSphere" -c connectEnvSphere;
+    button -label "Attach Lights" -c attachLights;
+    textFieldButtonGrp -label "Create directX11 Shader" -text "dx" -buttonLabel "Create" -bc createShaderFx shaderFx;*/
+    showWindow "wof_Select";
+}
+/*===========================================================*/
+global proc selectIcon()
+{
+    string $selQneue = "";
+    int $icon1 = `checkBox -q -v icon1`;    
+    if($icon1 == 1)
+    {
+        if( `objExists "icons_rig:icons_Ctrl"` == 1)
+        { 
+            $selQneue += "icons_rig:icons_Ctrl ";
+        }
+        
+    }
+    
+    int $icon2 = `checkBox -q -v icon2`;    
+    if($icon2 == 1)
+    {
+        if( `objExists "icons_rig1:icons_Ctrl"` == 1)
+        { 
+            $selQneue += "icons_rig1:icons_Ctrl ";
+        }
+        
+    }
+    
+    int $icon3 = `checkBox -q -v icon3`;    
+    if($icon3 == 1)
+    {
+        if( `objExists "icons_rig2:icons_Ctrl"` == 1)
+        { 
+            $selQneue += "icons_rig2:icons_Ctrl ";
+        }
+        
+    }
+
+    int $icon4 = `checkBox -q -v icon4`;    
+    if($icon4 == 1)
+    {
+        if( `objExists "icons_rig3:icons_Ctrl"` == 1)
+        { 
+            $selQneue += "icons_rig3:icons_Ctrl ";
+        }
+        
+    }
+
+    string $cmd = "select " + $selQneue;
+    eval($cmd);
+
+}
+/*======================================================================*/
+global proc selectIconTime()
+{
+    string $selQneue = "";
+    int $icon1 = `checkBox -q -v icon1`;    
+    if($icon1 == 1)
+    {
+        if( `objExists "icons_rig:icons_timeWrapCtrl"` == 1)
+        { 
+            $selQneue += "icons_rig:icons_timeWrapCtrl ";
+        }
+        
+    }
+    
+    int $icon2 = `checkBox -q -v icon2`;    
+    if($icon2 == 1)
+    {
+        if( `objExists "icons_rig1:icons_timeWrapCtrl"` == 1)
+        { 
+            $selQneue += "icons_rig1:icons_timeWrapCtrl ";
+        }
+        
+    }
+    
+    int $icon3 = `checkBox -q -v icon3`;    
+    if($icon3 == 1)
+    {
+        if( `objExists "icons_rig2:icons_timeWrapCtrl"` == 1)
+        { 
+            $selQneue += "icons_rig2:icons_timeWrapCtrl ";
+        }
+        
+    }
+
+    int $icon4 = `checkBox -q -v icon4`;    
+    if($icon4 == 1)
+    {
+        if( `objExists "icons_rig3:icons_timeWrapCtrl"` == 1)
+        { 
+            $selQneue += "icons_rig3:icons_timeWrapCtrl ";
+        }
+        
+    }
+
+    string $cmd = "select " + $selQneue;
+    eval($cmd);
+
+}
+
+global proc selCityTran()
+{
+    select "tableSwitchCtrl_rig:tran_Ctrl";
+}
+
+global proc selCityRot()
+{
+   select "tableSwitchCtrl_rig:rot_Ctrl"; 
+}
+
+global proc selSwitchCtrl()
+{
+    select tableSwitchCtrl_rig:switch_Ctrl;
+}
+
+wof_SelectItems();

@@ -1,0 +1,6 @@
+global proc wof_loadPinSetup()
+{
+	string $houdiniEngName = `houdiniAsset -la "N:\\mnt\\job\\18012WOF\\WorkingFile\\WOF\\lib\\Fx\\pinBoard\\components\\fx\\wip\\houdini\\hda\\pinBoardConvert.otl" "Sop/pinboard_convert"`;
+	rename $houdiniEngName "pinBoardSource";
+	setAttr "pinBoardSource.v" 0;
+}

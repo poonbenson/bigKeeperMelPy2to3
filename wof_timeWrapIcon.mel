@@ -1,0 +1,188 @@
+global proc wof_timeWrapIcon()
+{
+	if ( `window -ex "wof_timeWrapIcon"`)
+	{
+		deleteUI "wof_timeWrapIcon";
+	}
+
+    window -s 1 -width 250 -t "WOF icon timeWrap" "wof_timeWrapIcon";
+    columnLayout;
+    //text -l "select Icon " -fn "boldLabelFont";
+    //separator -height 10 -style "single";
+    floatFieldGrp -numberOfFields 1 -label "step " -value1 14 timeStep;
+    
+    button -l "Time Wrap" -c wof_timeWrapRun ;
+ 
+    showWindow "wof_timeWrapIcon";
+
+}
+
+
+
+global proc wof_timeWrapRun()
+{
+    int $startFrame = `getAttr "defaultRenderGlobals.startFrame"`;
+    int $endFrame = `getAttr "defaultRenderGlobals.endFrame"`;
+    float $timeStep = `floatFieldGrp -q -value1 timeStep`;
+    for($k = 0; $k < 4; $k++)
+    {
+        string $iconName = "";
+        string $iconTimeWrap = "";
+        string $iconTimeBlendCtrl = "";
+        if($k == 0)
+        {
+            $iconName = "icons_rig:icons_Ctrl";
+            $iconTimeWrap = "icons_rig:icons_timeWrapCtrl";
+            $iconTimeBlendCtrl = "icons_rig:icons_timeBlendCtrl";
+        }
+        else
+        {
+            $iconName = "icons_rig" + $k + ":icons_Ctrl";  
+            $iconTimeWrap = "icons_rig" + $k + ":icons_timeWrapCtrl";
+            $iconTimeBlendCtrl = "icons_rig" + $k + ":icons_timeBlendCtrl";
+        }
+        
+		setAttr ($iconTimeWrap + ".v") 0;
+		string $timeWrapAnmTmp[];
+		clear($timeWrapAnmTmp);
+		$timeWrapAnmTmp = `listConnections -s 1 -type "animCurve" ($iconTimeWrap + ".timeWrap")`;
+        delete $timeWrapAnmTmp;
+        
+        if( `objExists $iconName` == 1 )
+        {
+             
+            float $vecArray[];
+            clear($vecArray);
+            int $indx = 1;
+            /*=====================find velocity================================*/
+            for($i = $startFrame; $i < $endFrame; $i++)
+            {
+                
+                currentTime -e $i;
+                int $cTime = $i;
+                int $nTime = ($i-1);
+            
+                float $cx = `getAttr -t $cTime ($iconName + ".tx")`;
+                float $cy = `getAttr -t $cTime ($iconName + ".ty")`;
+                float $cz = `getAttr -t $cTime ($iconName + ".tz")`;
+                
+                float $nx = `getAttr -t $nTime ($iconName + ".tx")`;
+                float $ny = `getAttr -t $nTime ($iconName + ".ty")`;
+                float $nz = `getAttr -t $nTime ($iconName + ".tz")`;
+                
+                vector $vecCurr = <<$cx, $cy, $cz>>;
+                vector $vecNext = <<$nx, $ny, $nz>>;
+                
+                vector $vel = $vecNext - $vecCurr;
+                float $vec = mag($vel);
+                
+                
+                $vecArray[$indx-1] = $vec;
+                //$vecArray[$i-1] =  $i;
+                $indx += 1;
+                
+            
+            }
+            
+            /*===========================cal velocity median=====================================*/
+            float $sortVecArr[] = `sort($vecArray)`;
+            //print($sortVecArr);
+            //print("\n");
+            
+            float $medianVal = 0;
+            
+            int $lenArray = `size($sortVecArr)`;
+            //print("arraySize : " +  $lenArray);
+            if( ($lenArray % 2) == 0 )
+            {
+                $medianVal = $sortVecArr[($lenArray/2) - 1];        
+            }
+            else
+            {
+                float $v = ($sortVecArr[($lenArray/2) - 1]) + ($sortVecArr[($lenArray/2)]);
+                $medianVal = $v/2;    
+            }
+            //print("median : " + $medianVal + "\n");
+            /*===============================================================*/
+            
+            /*==========================set timewrap key======================================*/
+            for($i = $startFrame; $i < $endFrame; $i+= int($timeStep))
+            {
+                currentTime -e $i;
+                /*int $cTime = $i;
+                int $nTime = ($i-1);
+            
+                float $cx = `getAttr -t $cTime ($iconName + ".tx")`;
+                float $cy = `getAttr -t $cTime ($iconName + ".ty")`;
+                float $cz = `getAttr -t $cTime ($iconName + ".tz")`;
+                
+                float $nx = `getAttr -t $nTime ($iconName + ".tx")`;
+                float $ny = `getAttr -t $nTime ($iconName + ".ty")`;
+                float $nz = `getAttr -t $nTime ($iconName + ".tz")`;
+                
+                vector $vecCurr = <<$cx, $cy, $cz>>;
+                vector $vecNext = <<$nx, $ny, $nz>>;
+                
+                vector $vel = $vecNext - $vecCurr;
+                float $vec = mag($vel);*/
+                //print("frame " + $i  + "\n");
+                
+                select $iconTimeWrap;
+                setAttr ($iconTimeWrap + ".timeWrap") $i;
+                setKeyframe -v $i -at "timeWrap";
+            }
+            //$indx = 1;
+            for($i = $startFrame; $i < $endFrame; $i+= (int($timeStep/2)))
+            {
+                currentTime -e $i;
+                int $cTime = $i;
+                int $nTime = ($i-1);
+            
+                float $cx = `getAttr -t $cTime ($iconName + ".tx")`;
+                float $cy = `getAttr -t $cTime ($iconName + ".ty")`;
+                float $cz = `getAttr -t $cTime ($iconName + ".tz")`;
+                
+                float $nx = `getAttr -t $nTime ($iconName + ".tx")`;
+                float $ny = `getAttr -t $nTime ($iconName + ".ty")`;
+                float $nz = `getAttr -t $nTime ($iconName + ".tz")`;
+                
+                vector $vecCurr = <<$cx, $cy, $cz>>;
+                vector $vecNext = <<$nx, $ny, $nz>>;
+                
+                vector $vel = $vecNext - $vecCurr;
+                float $vec = mag($vel);
+                //print("frame " + $i + " : " + $vec + "\n");
+                if( ($vec > $medianVal) && ($vec > 1) )
+                {
+                    //print("frame : " + $i + "\n");
+                    select $iconTimeWrap;
+                    setAttr ($iconTimeWrap + ".timeWrap") $i;
+                    setKeyframe -v $i -at "timeWrap";
+                }
+                //$indx += 7;
+            }
+            
+            
+            keyTangent -ott step ($iconTimeWrap + ".timeWrap");
+        }
+        if( `objExists $iconName` == 1 )
+        {
+            string $anmCurve[];
+    		clear($anmCurve);
+            $anmCurve = `listConnections -type "animCurveTA" $iconName`; 
+            for($j = 0; $j < `size($anmCurve)`; $j++)
+            {
+                connectAttr -f ($iconTimeBlendCtrl + ".outputR") ($anmCurve[$j] + ".input");
+            }
+    
+    		clear($anmCurve);
+            $anmCurve = `listConnections -type "animCurveTL" $iconName`; 
+            for($j = 0; $j < `size($anmCurve)`; $j++)
+            {
+                connectAttr -f ($iconTimeBlendCtrl + ".outputR") ($anmCurve[$j] + ".input");
+            }
+        }
+    setAttr ($iconTimeWrap + ".v") 1;  
+    }
+}
+wof_timeWrapIcon();

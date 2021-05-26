@@ -1,0 +1,24 @@
+global string $gMainWindow;     // defined elsewhere by Maya
+
+// --------------------------------------------------------------------------
+    
+    // Get rid of existing menu in case it exists already...
+    //
+if (`menu -q -exists bigKeeperMeun`)
+    {
+    menu -e -dai bigKeeperMeun;
+    }
+else
+    {
+	setParent $gMainWindow ;
+    menu -l "BigKeeper" -p MayaWindow -to true bigKeeperMeun ;
+    }
+
+setParent -menu bigKeeperMeun ;
+
+
+//menuItem -l "Tools" -sm true -to true ;
+    menuItem -l ("BigKeeper") -c ("bigKeeper(); ") -ann ("Open BigKeeper");
+//    setParent -menu ".." ;
+
+bigKeeper();

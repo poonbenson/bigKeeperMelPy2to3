@@ -1,0 +1,89 @@
+global proc rsShaderCreate_Assign()
+{
+	if ( `window -ex "rsShaderCreate"`)
+	{
+		deleteUI "rsShaderCreate";
+	}
+
+    window -s 1 -width 250 -t "Rs Shader create and assign" "rsShaderCreate";
+    columnLayout;
+    radioButtonGrp -numberOfRadioButtons 3
+        -label "Shader Type" -labelArray3 "Reflect" "Matte" "Glossy" typeSel;
+    button -l "Run" -c createShd;
+    showWindow "rsShaderCreate";
+}
+
+
+global proc createShd()
+{
+    string $sel[];
+    clear($sel);
+    $sel = `ls -sl -fl`;
+    for($i = 0; $i < `size($sel)`; $i++)
+    {
+        string $allType = `objectType $sel[$i]`;
+        if($allType == "transform")
+        {
+            /*================ check shader already exist ================================*/
+            if( `objExists ($sel[$i] + "_Shd")` != 1)
+            {
+                shadingNode -asShader -n ($sel[$i] + "_Shd") RedshiftMaterial;
+                sets -renderable true -noSurfaceShader true -empty -name ($sel[$i] + "_ShdSG");
+                connectAttr -f ($sel[$i] + "_Shd" + ".outColor") ($sel[$i] + "_ShdSG" + ".surfaceShader");
+            }
+               
+            /*============================================================================*/
+            
+            /*==============set shader type==============================*/
+            
+            int $typeSelect = `radioButtonGrp -q -sl typeSel`;
+            if($typeSelect == 1)
+            {
+                setAttr ($sel[$i] + "_Shd.diffuse_weight") 0;
+                setAttr ($sel[$i] + "_Shd.refl_weight") 1;
+                setAttr ($sel[$i] + "_Shd.refl_roughness") 0.1;
+                setAttr ($sel[$i] + "_Shd.refl_fresnel_mode") 1;
+                setAttr ($sel[$i] + "_Shd.refl_reflectivity") -type double3 1 1 1 ;
+                
+            }
+            if($typeSelect == 2)
+            {
+                setAttr ($sel[$i] + "_Shd.diffuse_weight") 1;
+                setAttr ($sel[$i] + "_Shd.refl_weight") 0;
+                setAttr ($sel[$i] + "_Shd.refl_roughness") 0;
+                setAttr ($sel[$i] + "_Shd.refl_fresnel_mode") 1;
+                setAttr ($sel[$i] + "_Shd.refl_reflectivity") -type double3 1 1 1 ;
+            }
+            if($typeSelect == 3)
+            {
+                setAttr ($sel[$i] + "_Shd.diffuse_weight") 0.8;
+                setAttr ($sel[$i] + "_Shd.refl_weight") 1;
+                setAttr ($sel[$i] + "_Shd.refl_roughness") 0.45;
+                setAttr ($sel[$i] + "_Shd.refl_fresnel_mode") 1;
+                setAttr ($sel[$i] + "_Shd.refl_reflectivity") -type double3 0.5 0.5 0.5;
+            }
+            
+            /*============================================================*/
+            
+            string $selShape[] = `listRelatives -s $sel[$i]`;
+            
+            string $objType = `objectType $sel[$i]`;
+            if($selShape[0] == "" )
+            {
+                select $sel[$i];
+                hyperShade -a ($sel[$i] + "_Shd") $sel[$i];
+            }
+            else
+            {
+                string $shapeType = `objectType $selShape[0]`;
+                if($shapeType == "mesh" )
+                {
+                    select $sel[0];
+                    hyperShade -a ($sel[$i] + "_Shd") $selShape[0];            
+                }
+            };
+        }
+    }
+}
+
+

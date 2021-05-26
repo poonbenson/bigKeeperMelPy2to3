@@ -1,0 +1,127 @@
+global proc addFootagePlane()
+{
+	if ( `window -ex "addFootagePlaneWin"`)
+	{
+		deleteUI "addFootagePlaneWin";
+	}
+
+    window -s 1 -width 250 -t "Add Footage Plane Geo" "addFootagePlaneWin";
+    columnLayout;
+  
+    textFieldGrp
+        -label "footage plane name"
+        -text  "" footagePlaneGeoName;
+	button -l "Add" -c addFootagePlaneGeo;
+	
+    showWindow "addFootagePlaneWin";
+}
+
+
+
+global proc addFootagePlaneGeo()
+{
+	string $planeName = `textFieldGrp -q -tx footagePlaneGeoName`;
+	
+    string $sel[];
+    clear($sel);
+    $sel = `ls -sl -fl`;
+    
+    for($i = 0; $i < `size($sel)`; $i++)
+    {
+        string $selShape[];
+        clear($selShape);
+        $selShape = `listRelatives -c $sel[$i]`;
+        
+        if( `objectType $selShape[0]` == "camera")
+        {
+        
+            string $footagePlaneName[] = `polyPlane -w 1.28 -h 0.891 -sx 3 -sy 3 -ax 0 0 1 -cuv 2 -ch 1 -n $planeName`;
+            polyNormalizeUV -normalizeType 1 -preserveAspectRatio off -centerOnTile on -normalizeDirection 0 ($footagePlaneName[0] + ".map[0:15]");
+            group -empty -n ($footagePlaneName[0] + "Grp");    
+            parent $footagePlaneName[0] ($footagePlaneName[0] + "Grp"); 
+            
+            pointConstraint -offset 0 0 0 -weight 1 $sel[$i] ($footagePlaneName[0] + "Grp");
+            orientConstraint -offset 0 0 0 -weight 1 $sel[$i] ($footagePlaneName[0] + "Grp");
+            
+            setAttr ($footagePlaneName[0] + ".tz") -1;
+            
+            
+            /*float $f = getAttr ($sel[$i] + ".focalLength");
+            float $H = getAttr ($sel[$i] + ".horizontalFilmAperture");*/
+            
+            
+            string $horFilmAperConvert = `shadingNode -asUtility multDoubleLinear -n ("horiFilmAperInchConvert_" + $planeName)`;
+            setAttr ($horFilmAperConvert + ".input2") -25.405;
+            
+            string $divideHalf = `shadingNode -asUtility multDoubleLinear -n ("divideHalf_" + $planeName)`;
+            setAttr ($divideHalf + ".input2") 0.5;
+            
+            
+            connectAttr ($sel[$i] + ".horizontalFilmAperture") ($divideHalf + ".input1");
+            connectAttr ($divideHalf + ".output") ($horFilmAperConvert + ".input1");
+            
+            
+            string $divideFocalLength = `shadingNode -asUtility multiplyDivide -n ("divideFocalLength_" + $planeName)`;
+            setAttr ($divideFocalLength + ".operation") 2;
+            connectAttr ($horFilmAperConvert + ".output") (("divideFocalLength_" + $planeName) + ".input1X");
+            connectAttr ($sel[$i] + ".focalLength") (("divideFocalLength_" + $planeName) + ".input2X");
+            
+            string $multFootagePlaneTz = `shadingNode -asUtility multDoubleLinear -n ("multFootagePlaneTz_" + $planeName)`;
+            connectAttr ("divideFocalLength_"  + $planeName + ".outputX") ("multFootagePlaneTz_" + $planeName + ".input1");
+            connectAttr ($footagePlaneName[0] + ".tz") ("multFootagePlaneTz_" + $planeName + ".input2");
+            
+            
+            string $unifiyScale = `shadingNode -asUtility multDoubleLinear -n ("unifiyScale_" + $planeName)`;
+            addAttr -ln "offsetScale"  -at double  -dv 0 $footagePlaneName[0];
+            setAttr -e-keyable true ($footagePlaneName[0] + ".offsetScale");
+			
+			setAttr ($footagePlaneName[0] + ".offsetScale") 1;
+            
+            connectAttr ($footagePlaneName[0] + ".offsetScale") ("unifiyScale_" + $planeName + ".input2");
+            connectAttr ("multFootagePlaneTz_" + $planeName + ".output") ("unifiyScale_" + $planeName + ".input1");
+            
+            connectAttr ("unifiyScale_" + $planeName + ".output") ($footagePlaneName[0] + ".sx");
+            connectAttr ("unifiyScale_" + $planeName + ".output") ($footagePlaneName[0] + ".sy");
+            connectAttr ("unifiyScale_" + $planeName + ".output") ($footagePlaneName[0] + ".sz");
+         
+         
+            /*=========================assign Shader===============================================*/
+            
+            shadingNode -asShader -n ($footagePlaneName[0] + "_Shd") surfaceShader;
+            sets -renderable true -noSurfaceShader true -empty -name ($footagePlaneName[0] + "_ShdSG");
+            connectAttr -f ($footagePlaneName[0] + "_Shd" + ".outColor") ($footagePlaneName[0] + "_ShdSG" + ".surfaceShader");       
+            
+            
+            shadingNode -asTexture -n ($footagePlaneName[0] + "_File") -isColorManaged file;
+            shadingNode -asUtility place2dTexture -n ($footagePlaneName[0] + "place2dTexture");
+            connectAttr -f ($footagePlaneName[0] + "place2dTexture" + ".coverage") ($footagePlaneName[0] + "_File" + ".coverage");
+            connectAttr -f ($footagePlaneName[0] + "place2dTexture" + ".translateFrame") ($footagePlaneName[0] + "_File" + ".translateFrame");
+            connectAttr -f ($footagePlaneName[0] + "place2dTexture" + ".rotateFrame") ($footagePlaneName[0] + "_File" + ".rotateFrame");
+            connectAttr -f ($footagePlaneName[0] + "place2dTexture" + ".mirrorU") ($footagePlaneName[0] + "_File" + ".mirrorU");
+            connectAttr -f ($footagePlaneName[0] + "place2dTexture" + ".mirrorV") ($footagePlaneName[0] + "_File" + ".mirrorV");
+            connectAttr -f ($footagePlaneName[0] + "place2dTexture" + ".stagger") ($footagePlaneName[0] + "_File" + ".stagger");
+            connectAttr -f ($footagePlaneName[0] + "place2dTexture" + ".wrapU") ($footagePlaneName[0] + "_File" + ".wrapU");
+            connectAttr -f ($footagePlaneName[0] + "place2dTexture" + ".wrapV") ($footagePlaneName[0] + "_File" + ".wrapV");
+            connectAttr -f ($footagePlaneName[0] + "place2dTexture" + ".repeatUV") ($footagePlaneName[0] + "_File" + ".repeatUV");
+            connectAttr -f ($footagePlaneName[0] + "place2dTexture" + ".offset") ($footagePlaneName[0] + "_File" + ".offset");
+            connectAttr -f ($footagePlaneName[0] + "place2dTexture" + ".rotateUV") ($footagePlaneName[0] + "_File" + ".rotateUV");
+            connectAttr -f ($footagePlaneName[0] + "place2dTexture" + ".noiseUV") ($footagePlaneName[0] + "_File" + ".noiseUV");
+            connectAttr -f ($footagePlaneName[0] + "place2dTexture" + ".vertexUvOne") ($footagePlaneName[0] + "_File" + ".vertexUvOne");
+            connectAttr -f ($footagePlaneName[0] + "place2dTexture" + ".vertexUvTwo") ($footagePlaneName[0] + "_File" + ".vertexUvTwo");
+            connectAttr -f ($footagePlaneName[0] + "place2dTexture" + ".vertexUvThree") ($footagePlaneName[0] + "_File" + ".vertexUvThree");
+            connectAttr -f ($footagePlaneName[0] + "place2dTexture" + ".vertexCameraOne") ($footagePlaneName[0] + "_File" + ".vertexCameraOne");
+            connectAttr -f ($footagePlaneName[0] + "place2dTexture" + ".outUV") ($footagePlaneName[0] + "_File" + ".uv");
+            connectAttr -f ($footagePlaneName[0] + "place2dTexture" + ".outUvFilterSize") ($footagePlaneName[0] + "_File" + ".uvFilterSize");
+            
+            connectAttr -f ($footagePlaneName[0] + "_File" + ".outColor") ($footagePlaneName[0] + "_Shd" + ".outColor"); 
+            
+            string $footagePlaneShape[] = `listRelatives -s ($footagePlaneName[0])`;
+            select $footagePlaneName[0];
+            hyperShade -a ($footagePlaneName[0] + "_Shd") $footagePlaneShape[0];
+        }
+    
+    }
+}
+
+
+

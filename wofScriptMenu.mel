@@ -1,0 +1,46 @@
+global string $gMainWindow;     // defined elsewhere by Maya
+
+// --------------------------------------------------------------------------
+    
+    // Get rid of existing menu in case it exists already...
+    //
+if (`menu -q -exists wofScriptMeun`)
+    {
+    menu -e -dai wofScriptMeun;
+    }
+else
+    {
+	setParent $gMainWindow ;
+    menu -l "WOFScript" -p MayaWindow -to true wofScriptMeun ;
+    }
+
+setParent -menu wofScriptMeun ;
+
+
+//menuItem -l "Tools" -sm true -to true ;
+    menuItem -l ("wof_timeWrapIcon") -c ("wof_timeWrapIcon(); ") -ann ("Open wof_timeWrapIcon");
+	menuItem -l ("wof_targetBuildSetup") -c ("wof_targetBuildSetup(); ") -ann ("wof_targetBuildSetup");
+	menuItem -l ("wof_centralBuildSetup") -c ("wof_centralBuildSetup(); ") -ann ("wof_centralBuildSetup");
+	menuItem -l ("wof_SelectItems") -c ("wof_SelectItems(); ") -ann ("wof_SelectItems");
+	
+	menuItem -l "pin board" -sm true -to true;
+		menuItem -l ("wof_loadPinSetup") -c ("wof_loadPinSetup(); ") -ann ("wof_loadPinSetup");
+		menuItem -l ("wof_showPin") -c ("wof_showPin(); ") -ann ("wof_showPinBoard");		
+    setParent -menu ".." ;
+	
+	
+	menuItem -l "scan pointCloud" -sm true -to true;
+		menuItem -l ("wof_loadPointCloudSetup") -c ("wof_loadPointCloudSetup(); ") -ann ("wof_loadPointCloudSetup");
+		menuItem -l ("wof_showScanPointCloud") -c ("wof_showScanPointCloud(); ") -ann ("wof_showScanPointCloud");		
+    setParent -menu ".." ;	
+	
+	menuItem -l "pre Scan pointCloud" -sm true -to true;
+		menuItem -l ("wof_loadpreScanPointCloudSetup") -c ("wof_loadpreScanPointCloudSetup(); ") -ann ("wof_loadpreScanPointCloudSetup");
+		menuItem -l ("wof_showPreScanPointCloud") -c ("wof_showPreScanPointCloud; ") -ann ("wof_showPreScanPointCloud");		
+    setParent -menu ".." ;	
+
+/*wof_timeWrapIcon();
+wof_targetBuildSetup();
+wof_centralBuildSetup();
+wof_SelectItems();*/
+

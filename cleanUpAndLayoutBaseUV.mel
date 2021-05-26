@@ -1,0 +1,84 @@
+// --------------------------------------------------------------------------
+// cleanUpAndLayoutBaseUV.mel - MEL Script
+// --------------------------------------------------------------------------
+//
+// DESCRIPTION:
+//	Simple cleanup polygon model by merging vertex, unload normals....etc.
+//  also place a very rough simple UV which can be used as a start up UV
+
+
+
+// REQUIRES:
+//	Nothing.
+//
+
+//	LIMITES:
+//	only tiff file supported ~~~~~~	sorry
+//
+// USAGE:
+//	source "cleanUpAndLayoutBaseUV.mel"; cleanUpAndLayoutBaseUV();
+//
+// AUTHORS:
+//	Lik Wong    likwong@fatface.hk
+//	
+//
+// VERSIONS:
+//	
+//
+// --------------------------------------------------------------------------
+
+
+global proc cleanUpAndLayoutBaseUV()
+{
+
+	string $sel[];
+	clear($sel);
+	$sel = `ls -sl -fl`;
+	for($i = 0; $i < `size($sel)`; $i++)
+	{
+		polyMergeVertex  -d 0.001 -am 1 -ch 1 $sel[$i];
+		polyQuad  -a 30 -kgb 0 -ktb 0 -khe 0 -ws 0 -ch 1 $sel[$i];
+		polyAutoProjection -lm 1 -pb 0 -ibd 1 -cm 0 -l 3 -sc 2 -o 1 -p 6 -ps 0.2 -ws 0 $sel[$i];
+		
+		//int $uvN[] = `polyEvaluate -uv $sel[$i]`;
+		string $totalUV = $sel[$i] + ".map[" + "\*" + "]";
+		select -r $totalUV;
+		polyNormalizeUV -normalizeType 1 -preserveAspectRatio on $sel[$i];
+		polyMergeUV -d 0.001 -ch 1 $totalUV;
+		//unfold -i 5000 -ss 0.001 -gb 0 -gmb 0.5 -pub 0 -ps  0 -oa  0 -us off $totalUV;
+		polyLayoutUV -fr 1 -l 2 -sc 1 -se 0 -rbf 0 -lm 1 -ws 1 -ps 0.2 $totalUV;
+		
+		
+		//polySoftEdge -angle 30 -ch 1 $sel[$i];
+		//polySmooth  -mth 0 -dv 1 -bnr 1 -c 0 -kb 1 -ksb 1 -khe 0 -kt 1 -kmb 1 -suv 1 -peh 0 -sl 1 -dpe 1 -ps 0.1 -ro 1 -ch 1 $sel[$i];
+		polySoftEdge -angle 30 -ch 1 $sel[$i];
+		DeleteHistory;   
+	}  ;
+
+	for($i = 0; $i < `size($sel)`; $i++)
+	{
+		/*polyMergeVertex  -d 0.01 -am 1 -ch 1 $sel[$i];
+		polyQuad  -a 30 -kgb 0 -ktb 0 -khe 0 -ws 0 -ch 1 $sel[$i];
+		polyAutoProjection -lm 1 -pb 0 -ibd 1 -cm 0 -l 3 -sc 2 -o 1 -p 6 -ps 0.2 -ws 0 $sel[$i];*/
+		
+		//int $uvN[] = `polyEvaluate -uv $sel[$i]`;
+		string $totalUV = $sel[$i] + ".map[" + "\*" + "]";
+		select -r $totalUV;
+		polyNormalizeUV -normalizeType 1 -preserveAspectRatio on $sel[$i];
+		polyMergeUV -d 0.001 -ch 1 $totalUV;
+		//unfold -i 5000 -ss 0.001 -gb 0 -gmb 0.5 -pub 0 -ps  0 -oa  0 -us off $totalUV;
+		polyLayoutUV -fr 1 -l 2 -sc 1 -se 0 -rbf 0 -lm 1 -ws 1 -ps 0.2 $totalUV;
+		
+		
+		//polySoftEdge -angle 30 -ch 1 $sel[$i];
+		//polySmooth  -mth 0 -dv 1 -bnr 1 -c 0 -kb 1 -ksb 1 -khe 0 -kt 1 -kmb 1 -suv 1 -peh 0 -sl 1 -dpe 1 -ps 0.1 -ro 1 -ch 1 $sel[$i];
+		//polySoftEdge -angle 30 -ch 1 $sel[$i];
+		DeleteHistory;    
+	} ;
+	for($i = 0; $i < `size($sel)`; $i++)
+	{
+		select $sel[$i];
+		polyNormalPerVertex -ufn true;
+		DeleteHistory;
+	}
+}

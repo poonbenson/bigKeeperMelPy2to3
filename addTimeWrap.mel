@@ -1,0 +1,63 @@
+global proc addTimeWrap()
+{
+	if ( `window -ex "addTimeWrapWin"`)
+	{
+		deleteUI "addTimeWrapWin";
+	}
+
+    window -s 1 -width 250 -t "Add Time Wrap Ctrl" "addTimeWrapWin";
+    columnLayout;
+  
+    textFieldGrp
+        -label "time wrap name"
+        -text  "" timeWrapName;
+	button -l "Add" -c addTimeWrapRun;
+	
+    showWindow "addTimeWrapWin";
+}
+
+
+
+
+global proc addTimeWrapRun()
+{
+	
+	string $controlName = `textFieldGrp -q -tx timeWrapName`;
+	
+    string $sel[];
+    clear($sel);
+	
+    $sel = `ls -sl -fl`;
+        shadingNode -asUtility blendColors -n ($controlName + "_timeBlendCtrl");
+        spaceLocator -p 0 0 0 -n ($controlName + "_timeWrapCtrl");
+        addAttr -ln "timeWrap"  -at double  -dv 0 ($controlName + "_timeWrapCtrl");
+        setAttr -e-keyable true ($controlName + "_timeWrapCtrl.timeWrap");
+        
+        addAttr -ln "orgTime"  -at double  -dv 0 ($controlName + "_timeWrapCtrl");
+        setAttr -e-keyable true ($controlName + "_timeWrapCtrl.orgTime");
+        
+        addAttr -ln "enableTimeWrap"  -at bool ($controlName + "_timeWrapCtrl");
+        setAttr -e-keyable true ($controlName + "_timeWrapCtrl.enableTimeWrap");
+        
+        
+        connectAttr -f ($controlName + "_timeWrapCtrl.enableTimeWrap") ($controlName + "_timeBlendCtrl.blender"); 
+        connectAttr -f ($controlName + "_timeWrapCtrl.timeWrap") ($controlName + "_timeBlendCtrl.color1.color1R");
+        connectAttr -f ($controlName + "_timeWrapCtrl.orgTime") ($controlName + "_timeBlendCtrl.color2.color2R");
+        
+        connectAttr -f time1.outTime ($controlName + "_timeWrapCtrl.orgTime");
+    for($j = 0; $j < `size($sel)`; $j++)
+    {
+        string $anmCurve[];
+        clear($anmCurve);
+        
+
+        
+        $anmCurve = `listConnections -type "animCurve" $sel[$j]`; 
+        for($i = 0; $i < `size($anmCurve)`; $i++)
+        {
+            connectAttr -f ($controlName + "_timeBlendCtrl.outputR") ($anmCurve[$i] + ".input");
+        }
+    }
+
+}
+

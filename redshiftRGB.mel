@@ -1,0 +1,66 @@
+global proc redshiftRGB()
+{
+    rsCreateAov -type "Puzzle Matte";
+    redshiftUpdateActiveAovList;    
+    string $shadingSG[];
+    clear($shadingSG);
+    $shadingSG = `ls -type "shadingEngine" -fl`;
+    //$shadingSG = `ls -sl -fl`;
+    int $rgbCount = 0;
+    int $startUpId = 0;
+    string $puzzleAovName = "";
+    
+    select -cl;
+    select "rsAov_PuzzleMatte*";
+    string $puzAovNode[];
+    clear($puzAovNode);
+    $puzAovNode = `ls -sl -fl`;
+    
+
+    if( `size($puzAovNode)` > 1)
+    {
+        $startUpId = (size($puzAovNode) * 3);
+    }
+    
+    for($i = 0; $i < `size($shadingSG)`; $i++)
+    {
+    
+        
+    
+        int $matId = getAttr ($shadingSG[$i] + ".rsMaterialId");
+        if($matId == 0)
+        {
+            print("rgbCount : " + $rgbCount + "\n");
+            if($rgbCount == 0)
+            {
+                $puzzleAovName = `rsCreateAov -type "Puzzle Matte"`;
+                redshiftUpdateActiveAovList;                   
+            }        
+    
+    
+            $rgbCount += 1;
+            $startUpId += 1;
+            setAttr ($shadingSG[$i] + ".rsMaterialId") ($startUpId);
+            if($rgbCount == 1)
+            {
+                setAttr ($puzzleAovName + ".redId") ($startUpId);            
+            }
+            if($rgbCount == 2)
+            {
+                setAttr ($puzzleAovName + ".greenId") ($startUpId);  
+            }
+            if($rgbCount == 3)
+            {
+                setAttr ($puzzleAovName + ".blueId") ($startUpId);  
+            }
+            
+            if($rgbCount >= 3)
+            {
+                $rgbCount = 0;    
+            }
+            
+        }
+        
+    } 
+}
+

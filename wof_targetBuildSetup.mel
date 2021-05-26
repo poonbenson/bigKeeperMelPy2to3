@@ -1,0 +1,38 @@
+global proc wof_targetBuildSetup()
+{
+    pointConstraint -mo -weight 1 tableSwitchCtrl_rig:centerPos_loc targetBuilding_rig:targetBuilding_MoveAll;
+    orientConstraint -mo -weight 1 tableSwitchCtrl_rig:centerPos_loc targetBuilding_rig:targetBuilding_MoveAll;
+    scaleConstraint -mo -weight 1 tableSwitchCtrl_rig:centerPos_loc targetBuilding_rig:targetBuilding_MoveAll;
+    
+    pointConstraint -mo -weight 1 targetBuilding_rig:targetBuilding_Ctrl pandora_model:pandora_geoGrp;
+    orientConstraint -mo -weight 1 targetBuilding_rig:targetBuilding_Ctrl pandora_model:pandora_geoGrp;
+    scaleConstraint -mo -weight 1 targetBuilding_rig:targetBuilding_Ctrl pandora_model:pandora_geoGrp;
+    
+    pointConstraint -mo -weight 1 targetBuilding_rig:targetBuilding_Ctrl pandora_model:pandora_cropPreview_CtrlGrp;
+    orientConstraint -mo -weight 1 targetBuilding_rig:targetBuilding_Ctrl pandora_model:pandora_cropPreview_CtrlGrp;
+    scaleConstraint -mo -weight 1 targetBuilding_rig:targetBuilding_Ctrl pandora_model:pandora_cropPreview_CtrlGrp;
+    
+    for($i = 0; $i < 4; $i++)
+    {
+        string $iconName = "";
+        if($i == 0)
+        {
+            $iconName = "icons_rig:icons_MoveAll";   
+        }
+        else
+        {
+            $iconName = "icons_rig" + $i + ":icons_MoveAll";           
+        }
+    	if( `objExists $iconName ` == 1)
+		{
+			pointConstraint -mo -weight 1 targetBuilding_rig:targetBuilding_Ctrl $iconName;
+			orientConstraint -mo -weight 1 targetBuilding_rig:targetBuilding_Ctrl $iconName;
+			scaleConstraint -mo -weight 1 targetBuilding_rig:targetBuilding_Ctrl $iconName;
+		}
+    }
+    confirmDialog -title "Finished" -message "Finished"
+     -button "OK" -defaultButton "Yes"
+     -cancelButton "No" -dismissString "No";
+	
+}
+wof_targetBuildSetup();

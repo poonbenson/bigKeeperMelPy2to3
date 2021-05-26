@@ -1,0 +1,7 @@
+global proc wof_loadpreScanPointCloudSetup()
+{
+	string $houdiniEngName = `houdiniAsset -la "N:\\mnt\\job\\18012WOF\\WorkingFile\\WOF\\lib\\Fx\\pointCloudFx\\components\\fx\\wip\\houdini\\otl\\scanPointCloud.otl" "Sop/prescanpointcloud"`;
+	
+	rename $houdiniEngName "preScanPointCloudSource";
+	setAttr "preScanPointCloudSource.v" 0;
+}
